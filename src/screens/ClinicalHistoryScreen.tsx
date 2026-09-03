@@ -1,235 +1,336 @@
 import { useState } from 'react';
-import { user, medFiles } from '../data';
-import type { MedFile } from '../types';
+import type { UserProfile, MedFile } from '../types';
+import FileViewerModal from '../components/FileViewerModal';
 
-export default function ClinicalHistoryScreen() {
-  const [files, setFiles] = useState<MedFile[]>(medFiles);
-  const [expandedSection, setExpandedSection] = useState<string | null>('allergies');
-  const [showExportConfirm, setShowExportConfirm] = useState(false);
+interface ClinicalHistoryScreenProps {
+  user: UserProfile;
+  files: MedFile[];
+  onAddFile: (file: Omit<MedFile, 'id' | 'patientId'>) => void;
+  onOpenReportModal: () => void;
+}
 
-  const toggleSection = (id: string) => setExpandedSection(expandedSection === id ? null : id);
+export default function ClinicalHistoryScreen({
+  user,
+  files,
+  onAddFile,
+  onOpenReportModal,
+}: ClinicalHistoryScreenProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedFileForView, setSelectedFileForView] = useState<MedFile | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [newFileName, setNewFileName] = useState('');
+  const [newFileCategory, setNewFileCategory] = useState<'Laboratorio' | 'Imagenología' | 'Diagnóstico' | 'Receta'>('Laboratorio');
+  const [newFileInstitution, setNewFileInstitution] = useState('Laboratorios El Bosque');
 
-  const handleFileUpload = () => {
-    const mockFile: MedFile = {
-      id: String(Date.now()),
-      name: `Documento adjunto ${files.length + 1}`,
-      type: 'PDF',
+  const filteredFiles = files.filter(
+    (f) => selectedCategory === 'all' || f.category === selectedCategory
+  );
+
+  const handleUploadSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFileName) return;
+    onAddFile({
+      name: newFileName,
+      type: newFileCategory === 'Imagenología' ? 'Imagen' : 'PDF',
+      category: newFileCategory,
       date: new Date().toISOString().split('T')[0],
-    };
-    setFiles([mockFile, ...files]);
+      size: '1.5 MB',
+      encrypted: true,
+      institution: newFileInstitution,
+    });
+    setNewFileName('');
+    setShowUploadModal(false);
   };
 
-  const sections = [
-    {
-      id: 'allergies',
-      label: 'Alergias conocidas',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-cancelled" stroke="currentColor" strokeWidth="2">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-      ),
-      content: (
-        <div className="flex flex-wrap gap-2 pt-1">
+  return (
+    <div className="px-4 py-5 space-y-5 max-w-2xl mx-auto pb-24">
+      {/* Top Header & Export PDF CTA */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-display font-bold text-app-text text-lg">Historia Clínica Personal</h2>
+          <p className="text-xs text-muted-txt">Expediente médico confidencial y seguro (AES-256)</p>
+        </div>
+        <button
+          onClick={onOpenReportModal}
+          className="flex items-center gap-1.5 bg-primary text-white text-xs font-semibold px-3.5 py-2 rounded-xl hover:bg-primary-hover transition-all shadow-xs"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2">
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+            <polyline points="14,2 14,8 20,8" />
+          </svg>
+          Exportar PDF
+        </button>
+      </div>
+
+      {/* Security & OMS Digital Health Badge */}
+      <div className="bg-secondary-50 border border-secondary/25 rounded-2xl p-3.5 flex items-center justify-between text-secondary shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl">🔒</span>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-secondary">
+              Bóveda Médica Cifrada (OMS / Ley 1581)
+            </p>
+            <p className="text-[11px] text-muted-txt">
+              Tus antecedentes y archivos están protegidos con cifrado de nivel bancario.
+            </p>
+          </div>
+        </div>
+        <span className="text-[10px] bg-secondary text-white font-bold px-2 py-0.5 rounded-full">
+          AES-256
+        </span>
+      </div>
+
+      {/* Essential Health Indicators */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <div className="bg-surface border border-app-border rounded-2xl p-3 text-center shadow-xs">
+          <p className="text-xs text-muted-txt font-medium">Tipo de Sangre</p>
+          <p className="text-xl font-display font-bold text-red-600 mt-0.5">{user.bloodType}</p>
+        </div>
+        <div className="bg-surface border border-app-border rounded-2xl p-3 text-center shadow-xs">
+          <p className="text-xs text-muted-txt font-medium">Alergias</p>
+          <p className="text-xl font-display font-bold text-amber-600 mt-0.5">{user.allergies.length}</p>
+        </div>
+        <div className="bg-surface border border-app-border rounded-2xl p-3 text-center shadow-xs">
+          <p className="text-xs text-muted-txt font-medium">Archivos</p>
+          <p className="text-xl font-display font-bold text-primary mt-0.5">{files.length}</p>
+        </div>
+      </div>
+
+      {/* Allergies and Critical Alerts */}
+      <section className="bg-surface rounded-2xl border border-app-border p-4 shadow-xs space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-red-500 text-base">⚠️</span>
+          <h3 className="font-display font-bold text-app-text text-sm">Alergias y Contraindicaciones</h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
           {user.allergies.map((allergy) => (
-            <span key={allergy} className="bg-cancelled-bg text-cancelled text-xs font-semibold px-3 py-1.5 rounded-full border border-cancelled/20">
+            <span
+              key={allergy}
+              className="bg-red-50 text-red-700 border border-red-200 text-xs font-semibold px-3 py-1.5 rounded-xl"
+            >
               ⚠ {allergy}
             </span>
           ))}
         </div>
-      ),
-    },
-    {
-      id: 'conditions',
-      label: 'Enfermedades crónicas',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-pending" stroke="currentColor" strokeWidth="2">
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-        </svg>
-      ),
-      content: (
-        <ul className="pt-1 space-y-2">
-          {user.conditions.map((c, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-app-text">
-              <span className="w-1.5 h-1.5 rounded-full bg-pending mt-2 flex-shrink-0" />
-              {c}
+      </section>
+
+      {/* Chronic Conditions (CIE-10) */}
+      <section className="bg-surface rounded-2xl border border-app-border p-4 shadow-xs space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-amber-500 text-base">🩺</span>
+          <h3 className="font-display font-bold text-app-text text-sm">
+            Diagnósticos Activos y Condiciones Crónicas
+          </h3>
+        </div>
+        <ul className="space-y-2">
+          {user.conditions.map((condition, idx) => (
+            <li
+              key={idx}
+              className="flex items-center gap-2.5 text-xs text-slate-800 bg-slate-50 p-2.5 rounded-xl border border-slate-100 font-medium"
+            >
+              <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+              {condition}
             </li>
           ))}
         </ul>
-      ),
-    },
-  ];
-
-  return (
-    <div className="px-4 py-5 space-y-5 max-w-2xl mx-auto">
-      {/* Header with security badge */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-display font-bold text-app-text text-xl">Historia Clínica</h2>
-        <div className="flex items-center gap-1.5 bg-secondary-50 text-secondary text-xs font-semibold px-3 py-1.5 rounded-full border border-secondary/20">
-          <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="2">
-            <rect x="5" y="11" width="14" height="10" rx="2"/>
-            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-          </svg>
-          Alta seguridad
-        </div>
-      </div>
-
-      {/* Key health info bar */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: 'Tipo de sangre', value: user.bloodType, color: 'bg-cancelled-bg text-cancelled' },
-          { label: 'Alergias', value: `${user.allergies.length}`, color: 'bg-pending-bg text-pending' },
-          { label: 'Condiciones', value: `${user.conditions.length}`, color: 'bg-primary-50 text-primary' },
-        ].map((info) => (
-          <div key={info.label} className={`${info.color} rounded-2xl p-3 text-center`}>
-            <p className="text-2xl font-display font-bold">{info.value}</p>
-            <p className="text-xs font-medium mt-0.5 opacity-80">{info.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* EPS info */}
-      <div className="bg-surface rounded-2xl border border-app-border shadow-sm p-4">
-        <p className="text-xs font-semibold text-muted-txt uppercase tracking-wider mb-2">Información de afiliación</p>
-        <div className="space-y-2">
-          {[
-            { label: 'EPS', value: user.eps },
-            { label: 'IPS Primaria', value: user.ips },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between text-sm">
-              <span className="text-muted-txt">{item.label}</span>
-              <span className="font-semibold text-app-text">{item.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Accordion sections */}
-      <section className="space-y-3">
-        {sections.map((sec) => (
-          <div key={sec.id} className="bg-surface rounded-2xl border border-app-border shadow-sm overflow-hidden">
-            <button
-              onClick={() => toggleSection(sec.id)}
-              className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                {sec.icon}
-                <span className="font-semibold text-sm text-app-text">{sec.label}</span>
-              </div>
-              <svg viewBox="0 0 24 24" fill="none" className={`w-4 h-4 text-muted-txt transition-transform ${expandedSection === sec.id ? 'rotate-180' : ''}`} stroke="currentColor" strokeWidth="2">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </button>
-            {expandedSection === sec.id && (
-              <div className="px-4 pb-4 border-t border-app-border/50">
-                {sec.content}
-              </div>
-            )}
-          </div>
-        ))}
       </section>
 
-      {/* Files section */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-display font-semibold text-app-text">Archivos y exámenes</h3>
+      {/* Surgical History */}
+      <section className="bg-surface rounded-2xl border border-app-border p-4 shadow-xs space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-primary text-base">🏥</span>
+          <h3 className="font-display font-bold text-app-text text-sm">
+            Antecedentes Quirúrgicos y Procedimientos
+          </h3>
+        </div>
+        <ul className="space-y-2">
+          {user.surgeries.map((s, idx) => (
+            <li
+              key={idx}
+              className="flex items-center gap-2.5 text-xs text-slate-800 bg-slate-50 p-2.5 rounded-xl border border-slate-100 font-medium"
+            >
+              <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+              {s}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Encrypted Diagnostic Files Section */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-display font-bold text-app-text text-sm">
+              Bóveda de Exámenes y Documentos
+            </h3>
+            <p className="text-[11px] text-muted-txt">Almacenamiento personal con visor seguro integrado</p>
+          </div>
           <button
-            onClick={handleFileUpload}
-            className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary-50 px-3 py-2 rounded-xl hover:bg-primary-100 transition-colors border border-primary-100"
+            onClick={() => setShowUploadModal(true)}
+            className="flex items-center gap-1.5 bg-secondary-50 text-secondary border border-secondary-200 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-secondary-100 transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
-            Adjuntar
-            <svg viewBox="0 0 24 24" fill="none" className="w-3 h-3 text-secondary" stroke="currentColor" strokeWidth="2">
-              <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-            </svg>
+            Adjuntar Archivo
           </button>
         </div>
 
-        <div className="space-y-2">
-          {files.map((file) => (
-            <div key={file.id} className="bg-surface rounded-2xl border border-app-border shadow-sm p-3.5 flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                file.type === 'PDF' ? 'bg-cancelled-bg' : 'bg-primary-50'
-              }`}>
-                {file.type === 'PDF' ? (
-                  <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-cancelled" stroke="currentColor" strokeWidth="2">
-                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-primary" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21,15 16,10 5,21"/>
-                  </svg>
-                )}
+        {/* Category filters */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {['all', 'Laboratorio', 'Imagenología', 'Diagnóstico'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-all ${
+                selectedCategory === cat
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'bg-surface border border-app-border text-muted-txt hover:bg-slate-50'
+              }`}
+            >
+              {cat === 'all' ? 'Todos los archivos' : cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Files list */}
+        <div className="space-y-2.5">
+          {filteredFiles.map((file) => (
+            <div
+              key={file.id}
+              className="bg-surface rounded-2xl border border-app-border p-3.5 shadow-xs flex items-center justify-between gap-3 hover:border-primary/40 transition-all"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base flex-shrink-0 ${
+                    file.type === 'PDF' ? 'bg-red-50 text-red-600' : 'bg-primary-50 text-primary'
+                  }`}
+                >
+                  {file.type === 'PDF' ? '📄' : '🩻'}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-xs text-app-text truncate">{file.name}</p>
+                  <p className="text-[11px] text-muted-txt">
+                    {file.category} · {file.institution} · {file.date}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-app-text truncate">{file.name}</p>
-                <p className="text-xs text-muted-txt">{file.type} · {new Date(file.date + 'T00:00:00').toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-              </div>
+
               <div className="flex items-center gap-2 flex-shrink-0">
-                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-secondary" stroke="currentColor" strokeWidth="2" aria-label="Cifrado">
-                  <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-                </svg>
-                <button className="text-xs text-primary font-medium hover:underline">Ver</button>
+                <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md hidden sm:inline-block">
+                  ✓ Cifrado
+                </span>
+                <button
+                  onClick={() => setSelectedFileForView(file)}
+                  className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-primary-hover transition-colors shadow-xs"
+                >
+                  Ver examen
+                </button>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Export button */}
-      <div className="pt-2">
-        <button
-          onClick={() => setShowExportConfirm(true)}
-          className="w-full bg-primary text-white font-semibold py-4 rounded-2xl hover:bg-primary-hover transition-all shadow-md hover:shadow-lg font-display text-base flex items-center justify-center gap-2"
+      {/* Upload File Modal */}
+      {showUploadModal && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs"
+          onClick={() => setShowUploadModal(false)}
         >
-          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Exportar Resumen Clínico en PDF
-        </button>
-        <p className="text-center text-xs text-muted-txt mt-2">
-          Genera un documento seguro con tu información médica esencial
-        </p>
-      </div>
-
-      {/* Export confirm modal */}
-      {showExportConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-30 flex items-center justify-center p-4" onClick={() => setShowExportConfirm(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-6 text-center" onClick={(e) => e.stopPropagation()}>
-            <div className="w-16 h-16 rounded-full bg-primary-50 flex items-center justify-center mx-auto mb-4">
-              <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 text-primary" stroke="currentColor" strokeWidth="1.5">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/>
-              </svg>
-            </div>
-            <h3 className="font-display font-bold text-app-text text-lg mb-2">Exportar historia clínica</h3>
-            <p className="text-sm text-muted-txt mb-5">El PDF incluirá tus datos personales, alergias, condiciones, afiliación y archivos adjuntos. Está cifrado con tu contraseña.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowExportConfirm(false)} className="flex-1 py-3 rounded-xl border border-app-border text-sm font-semibold text-muted-txt hover:bg-slate-50 transition-colors">
-                Cancelar
-              </button>
+          <div
+            className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-app-border flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="font-display font-bold text-app-text text-base">Adjuntar Nuevo Documento</h3>
+                <p className="text-[11px] text-muted-txt">Se almacenará con cifrado seguro AES-256</p>
+              </div>
               <button
-                onClick={() => {
-                  setShowExportConfirm(false);
-                  alert('Resumen clínico generado exitosamente. (Demo)');
-                }}
-                className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-colors"
+                onClick={() => setShowUploadModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-300"
               >
-                Exportar
+                ✕
               </button>
             </div>
+
+            <form onSubmit={handleUploadSubmit} className="p-5 space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-muted-txt uppercase tracking-wider mb-1">
+                  Nombre del examen o informe
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: Cuadro Hemático y Perfil Lipídico"
+                  value={newFileName}
+                  onChange={(e) => setNewFileName(e.target.value)}
+                  className="w-full border border-app-border rounded-xl px-3.5 py-2.5 text-xs text-app-text focus:border-primary focus:ring-2 focus:ring-primary-50"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-txt uppercase tracking-wider mb-1">
+                  Categoría diagnóstica
+                </label>
+                <select
+                  value={newFileCategory}
+                  onChange={(e) =>
+                    setNewFileCategory(
+                      e.target.value as 'Laboratorio' | 'Imagenología' | 'Diagnóstico' | 'Receta'
+                    )
+                  }
+                  className="w-full border border-app-border rounded-xl px-3.5 py-2.5 text-xs text-app-text focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white"
+                >
+                  <option value="Laboratorio">Laboratorio Clínico (Sangre, Orina)</option>
+                  <option value="Imagenología">Imagenología (Rayos X, Ecografía, TAC)</option>
+                  <option value="Diagnóstico">Diagnóstico Clínico / Especialista</option>
+                  <option value="Receta">Fórmula / Orden Médica</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-txt uppercase tracking-wider mb-1">
+                  Institución emisora / IPS
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: Laboratorios El Bosque"
+                  value={newFileInstitution}
+                  onChange={(e) => setNewFileInstitution(e.target.value)}
+                  className="w-full border border-app-border rounded-xl px-3.5 py-2.5 text-xs text-app-text focus:border-primary focus:ring-2 focus:ring-primary-50"
+                  required
+                />
+              </div>
+
+              <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center bg-slate-50">
+                <span className="text-2xl">📎</span>
+                <p className="text-xs font-semibold text-slate-700 mt-1">
+                  Archivo seleccionado: muestra_digital_firmada.pdf
+                </p>
+                <p className="text-[10px] text-muted-txt">Cifrado automático antes de guardar</p>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 rounded-xl transition-colors font-display text-sm shadow-md"
+              >
+                Cifrar y Guardar en Historia Clínica
+              </button>
+            </form>
           </div>
         </div>
       )}
 
-      <div className="h-2" />
+      {/* Modal File Viewer */}
+      <FileViewerModal
+        file={selectedFileForView}
+        isOpen={Boolean(selectedFileForView)}
+        onClose={() => setSelectedFileForView(null)}
+      />
     </div>
   );
 }
