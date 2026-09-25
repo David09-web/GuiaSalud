@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
+import profileRoutes from './profile.routes';
 import agendaRoutes from './agenda.routes';
 import medicationRoutes from './medication.routes';
 import historyRoutes from './history.routes';
@@ -18,6 +19,7 @@ router.get('/health', (_req, res) => {
 });
 
 router.use('/auth', authRoutes);
+router.use('/profile', profileRoutes);
 router.use('/agenda', agendaRoutes);
 router.use('/medications', medicationRoutes);
 router.use('/clinical-history', historyRoutes);
