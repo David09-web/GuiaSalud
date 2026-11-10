@@ -1,0 +1,74 @@
+[
+  {
+    "patientId": "usr-1793361130336",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QABjOKNyfs9uyvX8jhCr0DNu_YYyrLDqxO659-q9sQoj7qtWbTJA-XmQuD0Oz06sIX3gU7DaQ9s8lDIQhadhADkT652ZMIjKnANkVFMYWms4-gaw3AF53Fy8W2-iE1IzUlkRk7C0ZVZiec44ifQxwKtadEYqalNn09TMK-cNcGg",
+      "keys": {
+        "p256dh": "BOHDB5ZHIj8YanymettXFCl1NaR9FAFzbVk1cI90Be9LLP7Nn-dHess0n7vKFR7DS4IkpfgQz9Lh6z55mOaD-t8",
+        "auth": "7M5fXHfDFV7EfrV3nP46Yg"
+      }
+    },
+    "reminders": [],
+    "updatedAt": "2026-10-30T12:00:59.588Z"
+  },
+  {
+    "patientId": "usr-1793368793642",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QDRCvb-kjaZC6Wbm1oeRR72CAoW7uiRCE3TWmRbziRoNKK8u1uu-XIumfFD4ozsdN6gBOqW5QjYi1x3rwmdClUAX_r9CO5pLQ17aBqe5lPFmE0lrGnKxtfDlkXhZk1VKRm5fAPeSKum_S1kaJjsbyuVoAr9OkqeKdEdUF1_xDko",
+      "keys": {
+        "p256dh": "BJOxMjZwGy3_YoNZ8qmAmA0lX6Nh2lHNhD_QdhADAd-1UmrHmtNEn_x8ztLcbDYQpe-gVn9s6_X54Lzxa3PE6hY",
+        "auth": "tvGCcIGiUoN4rk6LIw8-yg"
+      }
+    },
+    "reminders": [],
+    "updatedAt": "2026-10-30T14:29:48.393Z"
+  },
+  {
+    "patientId": "usr-1793931467698",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QHh8xx2xa-6fTMDbaWqURZc8HjRsxVuWPLn9BopqGg-CvrfU27ZyYpiYAPBJiTwHL4Hc_hWdDbnsdkIDe7JUTFrO9cKLWSnCInj17pdTwexf4m3qTvIODhBmnGeHP-R1g6bQGGXPByf9Cpg7LTIYZbDbFPHZ1RRBe2rvZEkMkJQ",
+      "keys": {
+        "p256dh": "BGmPm7boQcmUcsi94IB3slyhzgnbzMmer2UIhQVPvrjZWitWp40blE5T9Z8HIuiPktzcmBnx-wVciCwJvh0UsnQ",
+        "auth": "yR-dJvJjgk-SVK-IABEN8w"
+      }
+    },
+    "reminders": [],
+    "updatedAt": "2026-11-06T14:30:02.059Z"
+  },
+  {
+    "patientId": "usr-1793974524095",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QHh8xx2xa-6fTMDbaWqURZc8HjRsxVuWPLn9BopqGg-CvrfU27ZyYpiYAPBJiTwHL4Hc_hWdDbnsdkIDe7JUTFrO9cKLWSnCInj17pdTwexf4m3qTvIODhBmnGeHP-R1g6bQGGXPByf9Cpg7LTIYZbDbFPHZ1RRBe2rvZEkMkJQ",
+      "keys": {
+        "p256dh": "BGmPm7boQcmUcsi94IB3slyhzgnbzMmer2UIhQVPvrjZWitWp40blE5T9Z8HIuiPktzcmBnx-wVciCwJvh0UsnQ",
+        "auth": "yR-dJvJjgk-SVK-IABEN8w"
+      }
+    },
+    "reminders": [],
+    "updatedAt": "2026-11-06T14:15:25.343Z"
+  },
+  {
+    "patientId": "usr-1793975203994",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QHh8xx2xa-6fTMDbaWqURZc8HjRsxVuWPLn9BopqGg-CvrfU27ZyYpiYAPBJiTwHL4Hc_hWdDbnsdkIDe7JUTFrO9cKLWSnCInj17pdTwexf4m3qTvIODhBmnGeHP-R1g6bQGGXPByf9Cpg7LTIYZbDbFPHZ1RRBe2rvZEkMkJQ",
+      "keys": {
+        "p256dh": "BGmPm7boQcmUcsi94IB3slyhzgnbzMmer2UIhQVPvrjZWitWp40blE5T9Z8HIuiPktzcmBnx-wVciCwJvh0UsnQ",
+        "auth": "yR-dJvJjgk-SVK-IABEN8w"
+      }
+    },
+    "reminders": [],
+    "updatedAt": "2026-11-06T14:26:44.752Z"
+  },
+  {
+    "patientId": "usr-1793975523226",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QHh8xx2xa-6fTMDbaWqURZc8HjRsxVuWPLn9BopqGg-CvrfU27ZyYpiYAPBJiTwHL4Hc_hWdDbnsdkIDe7JUTFrO9cKLWSnCInj17pdTwexf4m3qTvIODhBmnGeHP-R1g6bQGGXPByf9Cpg7LTIYZbDbFPHZ1RRBe2rvZEkMkJQ",
+      "keys": {
+        "p256dh": "BGmPm7boQcmUcsi94IB3slyhzgnbzMmer2UIhQVPvrjZWitWp40blE5T9Z8HIuiPktzcmBnx-wVciCwJvh0UsnQ",
+        "auth": "yR-dJvJjgk-SVK-IABEN8w"
+      }
+    },
+    "reminders": [],
+    "updatedAt": "2026-11-06T14:36:17.174Z"
+  }
+]

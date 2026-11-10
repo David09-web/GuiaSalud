@@ -1,16 +1,55 @@
 <!doctype html>
-<html lang="<!-- figma:lang -->">
+<html lang="es" class="notranslate" translate="no">
   <head>
     <!-- figma:head-start -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="google" content="notranslate" />
     <title>GuiaSalud</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Tu salud organizada en un solo lugar. Agenda médica, medicamentos, historia clínica y más." />
+    <meta name="theme-color" content="#1565C0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GuiaSalud" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-512.png" />
+    <link rel="icon" type="image/png" href="/icon-512.png" />
     <!-- figma:head-end -->
   </head>
   <body>
     <!-- figma:body-start -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Service Worker Management -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        // En entorno de desarrollo (localhost), limpiar Service Worker y caché antigua para evitar pantallas en blanco
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.')) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            for (const registration of registrations) {
+              registration.unregister();
+            }
+          });
+          if ('caches' in window) {
+            caches.keys().then((names) => {
+              for (const name of names) {
+                if (name.startsWith('guiasalud-')) caches.delete(name);
+              }
+            });
+          }
+        } else {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(
+              (reg) => console.log('[SW] Registered:', reg.scope),
+              (err) => console.warn('[SW] Failed:', err)
+            );
+          });
+        }
+      }
+    </script>
     <!-- figma:body-end -->
   </body>
 </html>

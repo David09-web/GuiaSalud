@@ -32,40 +32,40 @@ export default function ClinicalReportModal({
   });
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-2 sm:p-4 backdrop-blur-xs overflow-y-auto">
       <div
-        className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden my-6 border border-slate-200 print:m-0 print:border-none print:shadow-none print:w-full print:max-w-none"
+        className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden my-2 sm:my-6 border border-slate-200 print:m-0 print:border-none print:shadow-none print:w-full print:max-w-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header toolbar (Hidden when printing) */}
-        <div className="p-4 bg-slate-900 text-white flex items-center justify-between print:hidden">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-primary-500/30 flex items-center justify-center">
+        <div className="p-3 sm:p-4 bg-slate-900 text-white flex items-center justify-between print:hidden gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-primary-500/30 flex items-center justify-center shrink-0">
               <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-primary-300" stroke="currentColor" strokeWidth="2">
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                 <polyline points="14,2 14,8 20,8" />
               </svg>
             </div>
-            <div>
-              <h3 className="font-display font-bold text-sm">Resumen Clínico Consolidado</h3>
-              <p className="text-xs text-slate-400">GuiaSalud Versión 1.0 - Formato de Consulta Médica</p>
+            <div className="truncate">
+              <h3 className="font-display font-bold text-xs sm:text-sm truncate">Resumen Clínico Consolidado</h3>
+              <p className="text-[10px] sm:text-xs text-slate-400 truncate">GuiaSalud Versión 1.0 - Formato de Consulta Médica</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handlePrint}
-              className="bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm"
+              className="bg-primary hover:bg-primary-hover text-white text-[11px] sm:text-xs font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 sm:w-4 sm:h-4" stroke="currentColor" strokeWidth="2">
                 <polyline points="6 9 6 2 18 2 18 9" />
                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                 <rect x="6" y="14" width="12" height="8" />
               </svg>
-              Imprimir / Guardar PDF
+              <span>Imprimir / PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-slate-700"
+              className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-slate-700 cursor-pointer"
             >
               ✕
             </button>
@@ -73,7 +73,7 @@ export default function ClinicalReportModal({
         </div>
 
         {/* Printable Document Body */}
-        <div className="p-8 space-y-6 text-slate-800 text-sm" id="printable-clinical-summary">
+        <div className="p-4 sm:p-8 space-y-6 text-slate-800 text-xs sm:text-sm" id="printable-clinical-summary">
           {/* Official Document Header */}
           <div className="border-b-2 border-primary pb-4 flex justify-between items-start">
             <div>
@@ -200,8 +200,8 @@ export default function ClinicalReportModal({
             <h2 className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
               3. Esquema Terapéutico Activo (Control de Medicamentos)
             </h2>
-            <div className="border border-slate-200 rounded-xl overflow-hidden">
-              <table className="w-full text-xs text-left">
+            <div className="border border-slate-200 rounded-xl overflow-x-auto">
+              <table className="w-full text-xs text-left min-w-[500px]">
                 <thead className="bg-slate-100 text-slate-600 border-b border-slate-200">
                   <tr>
                     <th className="p-2.5">Medicamento</th>
@@ -238,8 +238,8 @@ export default function ClinicalReportModal({
             <h2 className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
               4. Exámenes Diagnósticos y Archivos Adjuntos
             </h2>
-            <div className="border border-slate-200 rounded-xl overflow-hidden">
-              <table className="w-full text-xs text-left">
+            <div className="border border-slate-200 rounded-xl overflow-x-auto">
+              <table className="w-full text-xs text-left min-w-[500px]">
                 <thead className="bg-slate-100 text-slate-600 border-b border-slate-200">
                   <tr>
                     <th className="p-2.5">Estudio / Examen</th>
@@ -269,8 +269,8 @@ export default function ClinicalReportModal({
             <h2 className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
               5. Agenda Médica Reciente y Programada
             </h2>
-            <div className="border border-slate-200 rounded-xl overflow-hidden">
-              <table className="w-full text-xs text-left">
+            <div className="border border-slate-200 rounded-xl overflow-x-auto">
+              <table className="w-full text-xs text-left min-w-[500px]">
                 <thead className="bg-slate-100 text-slate-600 border-b border-slate-200">
                   <tr>
                     <th className="p-2.5">Fecha y Hora</th>
@@ -308,8 +308,8 @@ export default function ClinicalReportModal({
           {/* Official Footer / Legal Note */}
           <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500">
             <div>
-              <p><strong>GuiaSalud Versión 1.0</strong> | Proyecto de Ingeniería de Software II - FET Neiva</p>
-              <p>Docente Gestor: Miguel Antonio Urbano Silva | Equipo de Desarrollo: David Ospina, Juan Ramírez, Francisco Trujillo</p>
+              <p><strong>GuiaSalud</strong> | Expediente Personal de Salud Digital</p>
+              <p>Documento oficial emitido para apoyo en consulta médica y continuidad asistencial</p>
             </div>
             <div className="text-right">
               <p>Datos confidenciales protegidos bajo secreto médico y normas OMS.</p>

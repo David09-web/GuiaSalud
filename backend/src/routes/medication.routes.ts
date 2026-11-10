@@ -9,6 +9,9 @@ router.use(authMiddleware);
 router.use(requireRoles('PATIENT', 'FAMILY'));
 
 router.get('/', MedicationController.getMedications);
+router.post('/', MedicationController.createMedication);
+router.put('/:id', MedicationController.updateMedication);
+router.delete('/:id', MedicationController.deleteMedication);
 router.post('/:id/doses', MedicationController.registerDose);
 
 export default router;

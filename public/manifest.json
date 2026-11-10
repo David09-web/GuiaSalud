@@ -1,0 +1,20 @@
+{
+  "name": "GuiaSalud - Plataforma Integral de Salud",
+  "short_name": "GuiaSalud",
+  "description": "Tu salud organizada en un solo lugar. Agenda médica, medicamentos, historia clínica y más.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F0F4F8",
+  "theme_color": "#1565C0",
+  "lang": "es",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

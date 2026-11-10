@@ -2,7 +2,13 @@ export type UserRole = 'patient' | 'family' | 'admin';
 
 export type Screen = 'home' | 'agenda' | 'medications' | 'history' | 'tutorials' | 'profile' | 'admin';
 
-export type AppointmentStatus = 'pending' | 'done' | 'cancelled';
+export type AppointmentStatus =
+  | 'pending'
+  | 'done'
+  | 'cancelled'
+  | 'pendiente'
+  | 'realizada'
+  | 'cancelada';
 
 export type MedTakenStatus = 'none' | 'taken' | 'skipped';
 
@@ -56,6 +62,9 @@ export interface Appointment {
   center: string;
   status: AppointmentStatus;
   notes?: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
+  createdAt?: string;
 }
 
 export interface Medication {
@@ -81,6 +90,47 @@ export interface MedDoseHistory {
   status: 'taken' | 'skipped';
 }
 
+export interface AllergyItem {
+  id: string;
+  allergen: string;
+  reaction: string;
+  severity: 'Leve' | 'Moderada' | 'Severa / Anafilaxia';
+  diagnosedYear: string;
+  status: 'Activa' | 'En desensibilización' | 'Resuelta';
+}
+
+export interface MedicalBackgroundItem {
+  id: string;
+  category: 'Patológico' | 'Farmacológico' | 'Quirúrgico' | 'Familiar' | 'Tóxico-Alérgico';
+  title: string;
+  description: string;
+  year?: string;
+  relationship?: string; // Para antecedentes familiares
+}
+
+export interface ClinicalDiagnosisItem {
+  id: string;
+  code: string; // CIE-10
+  title: string;
+  category: string;
+  diagnosedDate: string;
+  status: 'Activo' | 'En tratamiento' | 'Controlado' | 'Resuelto';
+  doctor: string;
+  specialty: string;
+  notes?: string;
+}
+
+export interface ClinicalProcedureItem {
+  id: string;
+  title: string;
+  type: 'Cirugía' | 'Examen Diagnóstico' | 'Procedimiento Menor' | 'Hospitalización';
+  date: string;
+  institution: string;
+  doctor: string;
+  outcome?: string;
+  notes?: string;
+}
+
 export interface MedFile {
   id: string;
   patientId: string;
@@ -92,23 +142,41 @@ export interface MedFile {
   encrypted: boolean;
   institution: string;
   fileUrl?: string;
+  notes?: string;
+  sha256?: string;
+  cipherAlgorithm?: string;
 }
 
 export interface TutorialStep {
   title: string;
   description: string;
+  tip?: string;
+}
+
+export interface TutorialCategoryDef {
+  id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  color: string;
+  enabled: boolean;
 }
 
 export interface TutorialCategory {
   id: string;
+  categoryId: string;
+  categoryName?: string;
   title: string;
   emoji: string;
   description: string;
+  prerequisites: string[];
   steps: TutorialStep[];
   officialUrl: string;
   entityName: string;
   color: string;
   verified: boolean;
+  enabled: boolean;
+  updatedAt?: string;
 }
 
 export interface AuditLog {
@@ -131,4 +199,7 @@ export interface NotificationItem {
   timestamp: string;
   read: boolean;
   targetScreen?: Screen;
+  whatsAppUrl?: string;
+  advanceType?: '24h' | '12h' | '5h' | 'now';
+  apptId?: string;
 }

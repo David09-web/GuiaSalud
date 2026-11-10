@@ -1,4 +1,5 @@
 import type { Screen, UserRole } from '../types';
+import { triggerHaptic } from '../utils/haptics';
 
 interface BottomNavProps {
   screen: Screen;
@@ -101,28 +102,40 @@ export default function BottomNav({ screen, setScreen, currentRole }: BottomNavP
   const navItems = currentRole === 'admin' ? adminNavItems : patientNavItems;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-sm border-t border-app-border z-30 md:relative md:border-t-0 md:bg-transparent shadow-lg md:shadow-none">
-      <div className="flex items-center justify-around px-2 py-2 max-w-2xl mx-auto">
+    <nav
+      className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md border-t border-app-border z-30 md:relative md:border-t-0 md:bg-transparent shadow-lg md:shadow-none select-none"
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}
+    >
+      <div className="flex items-center justify-around px-2 py-1 max-w-2xl mx-auto">
         {navItems.map((item) => {
           const isActive = screen === item.id;
           return (
             <button
               key={item.id}
-              onClick={() => setScreen(item.id)}
-              className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 min-w-14 ${
+              onClick={() => {
+                triggerHaptic('selection');
+                setScreen(item.id);
+              }}
+              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-150 min-w-14 active:scale-90 touch-manipulation cursor-pointer ${
                 isActive
                   ? currentRole === 'admin'
-                    ? 'text-purple-700 font-bold bg-purple-50'
+                    ? 'text-purple-700 font-bold bg-purple-100/70 shadow-2xs'
                     : currentRole === 'family'
-                    ? 'text-emerald-700 font-bold bg-emerald-50'
-                    : 'text-primary font-bold bg-primary-50'
-                  : 'text-muted-txt hover:text-app-text hover:bg-slate-100/60'
+                    ? 'text-emerald-700 font-bold bg-emerald-100/70 shadow-2xs'
+                    : 'text-primary font-bold bg-primary-100/70 shadow-2xs'
+                  : 'text-muted-txt hover:text-app-text active:bg-slate-100'
               }`}
             >
-              <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+              <div
+                className={`transition-transform duration-200 ${
+                  isActive ? 'scale-110 -translate-y-0.5' : 'scale-100'
+                }`}
+              >
                 {item.icon}
               </div>
-              <span className="text-[10px] mt-1 tracking-tight leading-none">{item.label}</span>
+              <span className="text-[10px] mt-1 tracking-tight leading-none font-medium">
+                {item.label}
+              </span>
             </button>
           );
         })}

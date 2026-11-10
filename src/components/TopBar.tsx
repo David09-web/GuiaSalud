@@ -1,4 +1,5 @@
-import type { Screen, UserRole } from '../types';
+import type { Screen, UserRole, UserProfile } from '../types';
+import { triggerHaptic } from '../utils/haptics';
 
 interface TopBarProps {
   screen: Screen;
@@ -9,6 +10,8 @@ interface TopBarProps {
   unreadCount: number;
   onOpenNotifications: () => void;
   onLogout: () => void;
+  user: UserProfile;
+  isDemoUser?: boolean;
 }
 
 const titles: Record<Screen, string> = {
@@ -30,6 +33,8 @@ export default function TopBar({
   unreadCount,
   onOpenNotifications,
   onLogout,
+  user,
+  isDemoUser = false,
 }: TopBarProps) {
 
   const getRoleBadge = () => {
@@ -45,13 +50,28 @@ export default function TopBar({
 
   const roleInfo = getRoleBadge();
 
+  // Iniciales dinámicas del avatar
+  const getInitials = () => {
+    if (currentRole === 'admin') return 'AD';
+    if (currentRole === 'family') return 'CR';
+    if (!user || !user.name) return 'US';
+    const parts = user.name.trim().split(' ').filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return user.name.substring(0, 2).toUpperCase();
+  };
+
   return (
     <header className="bg-surface border-b border-app-border sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-xs">
       {/* Left title & branding */}
       <div className="flex items-center gap-2.5">
         <button
-          onClick={() => setScreen('home')}
-          className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-xs hover:opacity-90 transition-opacity"
+          onClick={() => {
+            triggerHaptic('light');
+            setScreen('home');
+          }}
+          className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-xs hover:opacity-90 active:scale-90 transition-all touch-manipulation cursor-pointer"
           aria-label="Ir a Inicio"
         >
           <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2.5">
@@ -66,27 +86,52 @@ export default function TopBar({
           {currentRole === 'family' ? (
             <p className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Cuidando a: María Rodríguez
+              Cuidando a: {user.name || 'María Rodríguez'}
             </p>
           ) : currentRole === 'admin' ? (
             <p className="text-[11px] text-purple-600 font-medium">Gestión de Trámites & Auditoría</p>
           ) : (
-            <p className="text-[11px] text-muted-txt">Salud digital y bienestar</p>
+            <p className="text-[11px] text-muted-txt">
+              {user?.firstName ? `Salud de ${user.firstName}` : 'Salud digital y bienestar'}
+            </p>
           )}
         </div>
       </div>
 
-      {/* Right controls: Role Selector, Notifications, Profile */}
+      {/* Right controls: Role Selector (Only in Demo mode), Notifications, Profile */}
       <div className="flex items-center gap-2">
-        {/* Role Badge */}
-        <div className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border ${roleInfo.bg} flex items-center gap-1.5`}>
-          <span>{roleInfo.label}</span>
-        </div>
+        {/* En cuentas reales/creadas NO se muestra el selector interactivo; se muestra una insignia estática */}
+        {isDemoUser ? (
+          <select
+            value={currentRole}
+            onChange={(e) => {
+              triggerHaptic('selection');
+              onRoleChange(e.target.value as UserRole);
+            }}
+            className={`text-xs font-semibold px-2 py-1.5 rounded-xl border ${roleInfo.bg} cursor-pointer focus:outline-hidden transition-all shadow-2xs touch-manipulation active:scale-95`}
+            title="Cambiar rol (Modo Demostración)"
+          >
+            <option value="patient">Rol: Paciente (Demo)</option>
+            <option value="admin">Rol: Administrador (Demo)</option>
+            <option value="family">Rol: Familiar (Demo)</option>
+          </select>
+        ) : (
+          <div
+            className={`text-xs font-semibold px-2.5 py-1.5 rounded-xl border ${roleInfo.bg} flex items-center gap-1.5 shadow-2xs select-none`}
+            title="Rol de cuenta verificado"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <span>Rol: {roleInfo.label}</span>
+          </div>
+        )}
 
         {/* Notifications button */}
         <button
-          onClick={onOpenNotifications}
-          className="relative w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+          onClick={() => {
+            triggerHaptic('light');
+            onOpenNotifications();
+          }}
+          className="relative w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-90 flex items-center justify-center transition-all touch-manipulation cursor-pointer"
           aria-label="Abrir centro de notificaciones"
         >
           <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-app-text" stroke="currentColor" strokeWidth="2">
@@ -102,8 +147,11 @@ export default function TopBar({
 
         {/* Logout button */}
         <button
-          onClick={onLogout}
-          className="relative w-9 h-9 rounded-xl bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors"
+          onClick={() => {
+            triggerHaptic('warning');
+            onLogout();
+          }}
+          className="relative w-9 h-9 rounded-xl bg-red-50 hover:bg-red-100 active:scale-90 flex items-center justify-center transition-all touch-manipulation cursor-pointer"
           title="Cerrar sesión"
         >
           <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-red-600" stroke="currentColor" strokeWidth="2">
@@ -115,8 +163,11 @@ export default function TopBar({
 
         {/* Profile Avatar button */}
         <button
-          onClick={onProfileClick}
-          className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold font-display text-white transition-all shadow-xs ${
+          onClick={() => {
+            triggerHaptic('light');
+            onProfileClick();
+          }}
+          className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold font-display text-white active:scale-90 transition-all shadow-xs touch-manipulation cursor-pointer ${
             currentRole === 'admin'
               ? 'bg-purple-700 ring-2 ring-purple-300'
               : currentRole === 'family'
@@ -124,8 +175,9 @@ export default function TopBar({
               : 'bg-primary ring-2 ring-primary-300'
           }`}
           aria-label="Ver perfil"
+          title={`Perfil de ${user?.name || 'Usuario'}`}
         >
-          {currentRole === 'admin' ? 'AD' : currentRole === 'family' ? 'CR' : 'MR'}
+          {getInitials()}
         </button>
       </div>
     </header>

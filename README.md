@@ -116,11 +116,15 @@ GuiaSalud/
 │   └── main.tsx
 │
 ├── docs/                      # 📚 Documentación Técnica y Académica
+│   ├── ACTAS_DE_REUNION_PROYECTO.md       # Libro Oficial de 5 Actas de Reunión (Sem. 1 a 7)
+│   ├── PLAN_DE_TRABAJO_PROYECTO.md        # Plan de Trabajo Maestro del Proyecto (16 Semanas)
+│   ├── CONVOCATORIAS_Y_COMITES_PROYECTO.md# Convocatorias a comités técnicos y feria FET
 │   ├── API_REST_SPECIFICATION.md          # Especificación OpenAPI / REST
 │   ├── CONFIGURACION_REPOSITORIO_Y_ENTORNOS.md # Informe técnico del entregable 1
 │   ├── DATABASE_MODEL_POSTGRESQL.sql     # Script DDL de Base de Datos
 │   ├── DIAGRAMA_ER.md                    # Diagrama Entidad-Relación
 │   ├── MANUAL_DE_USUARIO_Y_ARQUITECTURA.md# Manual de usuario y arquitectura
+│   ├── MODULO_5_TUTORIALES_Y_ADMINISTRACION.md # Módulo 5: Tutoriales y Panel Admin
 │   └── PLAN_PRUEBAS_Y_MATRIZ_RIESGOS_OMS.md # Matriz de riesgos y plan de pruebas
 │
 ├── index.html                 # Shell HTML Vite

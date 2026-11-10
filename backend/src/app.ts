@@ -20,8 +20,11 @@ export const createApp = (): Application => {
   // Middleware de auditoría
   app.use(auditLoggerMiddleware);
 
-  // Rutas principales
+  // Rutas principales (soporta tanto /api/v1 como /api según especificación técnica)
   app.use(ENV.API_PREFIX, routes);
+  if (ENV.API_PREFIX !== '/api') {
+    app.use('/api', routes);
+  }
 
   // Ruta raíz de bienvenida
   app.get('/', (_req, res) => {

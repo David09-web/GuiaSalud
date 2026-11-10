@@ -30,7 +30,12 @@ export const auditLoggerMiddleware = (req: AuthenticatedRequest, res: Response, 
   
   res.on('finish', () => {
     const duration = Date.now() - start;
-    if (req.path.startsWith('/api/v1/clinical-history') || req.path.startsWith('/api/v1/auth')) {
+    if (
+      req.path.includes('/clinical-history') ||
+      req.path.includes('/auth') ||
+      req.path.includes('/citas') ||
+      req.path.includes('/agenda')
+    ) {
       const entry: AuditLogEntry = {
         id: `log-${Date.now()}`,
         timestamp: new Date().toISOString(),
@@ -39,7 +44,7 @@ export const auditLoggerMiddleware = (req: AuthenticatedRequest, res: Response, 
         userRole: req.user?.role,
         ipAddress: req.ip || '127.0.0.1',
         status: res.statusCode < 400 ? 'SUCCESS' : 'WARNING',
-        details: `Status ${res.statusCode} en ${duration}ms`,
+        details: `Operación Agenda/Citas: Status ${res.statusCode} en ${duration}ms`,
       };
       auditLogs.unshift(entry);
     }

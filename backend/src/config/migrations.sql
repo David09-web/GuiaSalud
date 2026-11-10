@@ -170,5 +170,51 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
+-- TABLA: citas_medicas (Módulo 1 - Agenda Médica: Registro, Estados e Historial)
+-- Responsable Backend: David Marcet Ospina
+-- Responsable Frontend: Francisco Trujillo Peralta
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS citas_medicas (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  patient_id        UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  specialty         VARCHAR(120) NOT NULL,
+  doctor            VARCHAR(150) NOT NULL,
+  center            VARCHAR(200) NOT NULL,
+  date              DATE NOT NULL,
+  time              VARCHAR(10) NOT NULL,
+  notes             TEXT DEFAULT '',
+  status            VARCHAR(20) NOT NULL DEFAULT 'pendiente' 
+                    CHECK (status IN ('pendiente', 'realizada', 'cancelada', 'pending', 'done', 'cancelled')),
+  is_deleted        BOOLEAN NOT NULL DEFAULT false,
+  deleted_at        TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_citas_patient_id ON citas_medicas(patient_id);
+CREATE INDEX IF NOT EXISTS idx_citas_date ON citas_medicas(date);
+CREATE INDEX IF NOT EXISTS idx_citas_status ON citas_medicas(status);
+CREATE INDEX IF NOT EXISTS idx_citas_is_deleted ON citas_medicas(is_deleted);
+
+CREATE TRIGGER update_citas_updated_at
+  BEFORE UPDATE ON citas_medicas
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Semillas de Citas Médicas Iniciales
+INSERT INTO citas_medicas (id, patient_id, specialty, doctor, center, date, time, notes, status)
+VALUES
+  ('d3eebc99-9c0b-4ef8-bb6d-6bb9bd380d44', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+   'Medicina General', 'Dr. Andrés Morales', 'Centro Médico El Bosque - Consultorio 304',
+   '2026-10-15', '09:30', 'Control semestral de presión arterial. Llevar bitácora de tomas.', 'pendiente'),
+  ('e4eebc99-9c0b-4ef8-bb6d-6bb9bd380e55', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+   'Cardiología', 'Dra. Claudia Vega', 'Clínica del Norte - Piso 4',
+   '2026-10-22', '14:00', 'Revisión de electrocardiograma y ajuste de dosis de Enalapril.', 'pendiente'),
+  ('f5eebc99-9c0b-4ef8-bb6d-6bb9bd380f66', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+   'Laboratorio Clínico', 'Lic. Sandra Pérez', 'Sede Calle 45 - Laboratorio Central',
+   '2026-09-25', '07:15', 'Perfil lipídico y glucosa en ayunas (12 horas de ayuno).', 'realizada')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
 -- FIN DE MIGRACIÓN
 -- ============================================================================
+

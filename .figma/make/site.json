@@ -1,4 +1,5 @@
 {
+  "language": "es",
   "description": "Organiza y gestiona información personal de salud con citas, medicamentos, historial clínico y tutoriales para facilitar trámites y mejorar el bienestar.",
   "robots": {
     "index": false

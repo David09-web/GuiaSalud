@@ -28,11 +28,35 @@
   --color-emergency-bg: #FFF1F1;
 }
 
-html, body, #root {
-  height: 100%;
+html {
+  min-height: 100%;
   font-family: 'Inter', sans-serif;
   background-color: #F0F4F8;
   color: #0F172A;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background-color: #F0F4F8;
+  color: #0F172A;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+  /* Permitir que el body sea el scroll principal, no un contenedor interno */
+  touch-action: pan-x pan-y;
+}
+
+#root {
+  min-height: 100%;
+  min-height: 100dvh;
+  position: relative;
+  /* NO usar display:flex aquí — permite scroll natural del documento */
 }
 
 .font-display {
@@ -44,6 +68,217 @@ html, body, #root {
   scrollbar-color: #CBD5E1 transparent;
 }
 
-*::-webkit-scrollbar { width: 4px; height: 4px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+/* Safe area padding for devices with notch/home indicator */
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* =============================================
+   SISTEMA DE INTERACTIVIDAD TÁCTIL MÓVIL
+   ============================================= */
+
+/* Eliminación de retraso de 300ms — SOLO en elementos interactivos, NO en contenedores de scroll */
+button,
+a,
+select,
+input,
+textarea,
+label,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+.interactive-card,
+.touch-interactive {
+  touch-action: manipulation;
+}
+
+/* Transición elástica y feedback táctil inmediato en todos los elementos interactivos */
+button,
+a,
+select,
+[role="button"],
+.interactive-card,
+.touch-interactive {
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.12s ease;
+  -webkit-tap-highlight-color: rgba(21, 101, 192, 0.12);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+/* Respuesta de compresión táctil (sensación física de botón presionado) */
+button:active,
+a:active,
+[role="button"]:active,
+.interactive-card:active,
+.touch-interactive:active {
+  transform: scale(0.95) !important;
+  opacity: 0.9;
+}
+
+/* Evitar selección accidental de texto mientras se navega con el dedo */
+button,
+a,
+select,
+[role="button"],
+.select-none {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Desplazamiento táctil fluido y con inercia nativa (iOS Momentum Scrolling) */
+.overflow-y-auto,
+.overflow-auto,
+[style*="overflow"],
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  /* Restaurar touch-action para que estos contenedores puedan scrollear libremente */
+  touch-action: pan-x pan-y;
+}
+
+/* Contenedor de deslizamiento horizontal táctil (Swipeable chips/tabs) */
+.touch-scroll-x {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+  touch-action: pan-x;
+}
+
+.touch-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+.touch-scroll-x>* {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Modo PWA Standalone y ajuste para barra de inicio en iPhones / Android */
+@media all and (display-mode: standalone) {
+  header.sticky {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem) !important;
+  }
+
+  nav.fixed.bottom-0 {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem) !important;
+  }
+}
+
+/* Estilos de barra de instalación PWA */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 84px;
+  left: 12px;
+  right: 12px;
+  z-index: 9999;
+  background: linear-gradient(135deg, #1565C0, #0D47A1);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 18px;
+  box-shadow: 0 10px 36px rgba(21, 101, 192, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pwa-install-banner button.install {
+  background: white;
+  color: #1565C0;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pwa-install-banner button.dismiss {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  padding: 6px 10px;
+  font-size: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Ajustes responsivos para pantallas táctiles */
+@media (max-width: 640px) {
+
+  button,
+  a,
+  [role="button"] {
+    min-height: 42px;
+  }
+
+  /* Excepción para botones pequeños / iconos que no deben deformarse */
+  button.p-1,
+  button.p-1\.5,
+  button.p-2,
+  .btn-compact {
+    min-height: unset;
+  }
+
+  .px-4 {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* =============================================
+   GARANTÍA DE SCROLL TÁCTIL EN MODALES Y CONTENIDO
+   ============================================= */
+
+/* Los modales (fixed inset-0) deben poder scrollear internamente en celulares */
+.fixed.inset-0 {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Garantizar que el contenido principal siempre sea scrolleable con el dedo */
+main {
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
