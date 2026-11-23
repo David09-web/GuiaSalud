@@ -159,3 +159,29 @@
 
 3. **¿Qué tipo de pruebas realizaron y cómo validaron los formularios?**  
    *Respuesta sugerida (Francisco):* "Ejecutamos pruebas unitarias automatizadas con Node.js y React Testing Library verificando límites de expresiones regulares (RegEx) para impedir caracteres aleatorios, inyecciones de código y números en nombres propios. Además, aplicamos una matriz de riesgos alineada con lineamientos de la OMS para seguridad del paciente."
+
+---
+
+## 🛠️ Anexo Técnico: Guía de Profundización para David Marcet (Backend Lead)
+
+Si el docente o jurado solicita una explicación más detallada de la arquitectura técnica, David puede apoyarse en estos cuatro pilares:
+
+### 1. Arquitectura de Servicios y Modelo Relacional
+- **Stack:** Node.js, Express y TypeScript con arquitectura limpia por capas (Controladores, Servicios, Rutas y Middlewares).
+- **Persistencia:** Base de datos PostgreSQL en 3NF con claves foráneas, restricciones de integridad referencial e índices en campos de búsqueda frecuente (ID de usuario, fecha de cita, código de medicamento).
+- **Soft-Delete (Inmutabilidad Clínica):** Ningún registro clínico sensible se destruye con `DELETE`. Se maneja columna de baja lógica (`deleted_at` / estado inactivo) para garantizar no repudiabilidad legal y trazabilidad según la Resolución 1995 de 1999 y Ley 1581.
+
+### 2. Lógica del Módulo de Agenda y Notificaciones
+- Endpoints transaccionales para agendamiento, verificación de solapamiento de horarios y estados de cita (`Pendiente`, `Realizada`, `Cancelada`).
+- Generación de plantillas dinámicas de mensaje para **WhatsApp Web / API** con deep links seguros (`https://wa.me/...`), asegurando comunicación asíncrona hacia el paciente y su cuidador.
+
+### 3. Algoritmo de Adherencia y Alerta Preventiva
+- **Adherencia Terapéutica:** Registro de tomas en bitácora histórica (`tomas_log`). La tasa se calcula analíticamente:  
+  $$\text{Adherencia (\%)} = \left(\frac{\text{Dosis efectivamente tomadas}}{\text{Dosis programadas en el periodo}}\right) \times 100$$
+- **Alerta del 80%:** El backend y cliente monitorean el tiempo transcurrido del tratamiento: al superar el 80% de su duración, se emite una notificación de advertencia recomendando gestionar la cita de renovación de fórmula médica ante la EPS.
+
+### 4. Seguridad y Cifrado
+- Cifrado en reposo bajo estándar **AES-256-GCM** para diagnósticos y documentos confidenciales.
+- Autenticación mediante **JWT** con expiración corta y tokens de actualización, junto con control de acceso por roles (**RBAC**) para segregar vistas de pacientes, cuidadores y administradores.
+
+
